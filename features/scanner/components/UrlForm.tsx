@@ -23,36 +23,22 @@ interface UrlFormProps {
   serverError?: string | null;
 }
 
+// UPDATED: Using correct IDs from documentation
 const AVAILABLE_MODELS = [
   {
-    id: "gemini-3-pro-preview",
-    name: "Gemini 3 Pro Preview",
-    description: "Our most intelligent model for complex reasoning and tasks.",
+    id: "gemini-2.0-flash",
+    name: "Gemini 2.0 Flash",
+    description: "Best balance of speed, stability, and rate limits.",
   },
   {
-    id: "gemini-3-flash-preview",
-    name: "Gemini 3 Flash Preview",
-    description: "Fast and efficient; the best balance of speed and smarts.",
+    id: "gemini-2.0-flash-lite-preview-02-05",
+    name: "Gemini 2.0 Flash Lite",
+    description: "Extremely fast, low cost. Good for simple JSON tasks.",
   },
   {
-    id: "gemini-2.5-pro",
-    name: "Gemini 2.5 Pro",
-    description: "High-performance model for complex multi-modal tasks.",
-  },
-  {
-    id: "gemini-2.5-flash-lite",
-    name: "Gemini 2.5 Flash Lite",
-    description: "Optimized for speed and high-throughput workloads.",
-  },
-  {
-    id: "gemini-2.5-flash-image-preview",
-    name: "Gemini 2.5 Flash (Image)",
-    description: "Specialized for rapid image processing and generation.",
-  },
-  {
-    id: "gemini-2.5-pro-preview-tts",
-    name: "Gemini 2.5 Pro (TTS)",
-    description: "Advanced text-to-speech and audio processing capabilities.",
+    id: "gemini-2.0-pro-exp-02-05",
+    name: "Gemini 2.0 Pro",
+    description: "High reasoning capability for complex audits.",
   },
 ];
 
