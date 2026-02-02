@@ -1,69 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AuditResult } from "../types";
 
-const AUDIT_SCHEMA = {
-  type: Type.OBJECT,
-  properties: {
-    scanId: { type: Type.STRING },
-    status: { type: Type.STRING, enum: ["completed", "failed"] },
-    scores: {
-      type: Type.OBJECT,
-      properties: {
-        total: { type: Type.INTEGER },
-        discovery: { type: Type.INTEGER },
-        offerClarity: { type: Type.INTEGER },
-        transaction: { type: Type.INTEGER },
-      },
-      required: ["total", "discovery", "offerClarity", "transaction"],
-    },
-    issues: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          severity: { type: Type.STRING, enum: ["critical", "warning", "info"] },
-          title: { type: Type.STRING },
-          description: { type: Type.STRING },
-          remediationId: { type: Type.STRING },
-        },
-        required: ["severity", "title", "description"],
-      },
-    },
-    artifacts: {
-      type: Type.OBJECT,
-      properties: {
-        manifestContent: { 
-          type: Type.OBJECT,
-          description: "The actual JSON content for a ucp.json file. It must follow the Universal Commerce Protocol standard.",
-          properties: {
-            "ucp_version": { type: Type.STRING, enum: ["1.0", "2.0-alpha"] },
-            "domain": { type: Type.STRING },
-            "capabilities": {
-                type: Type.ARRAY,
-                items: { type: Type.STRING, enum: ["search", "cart", "checkout", "inventory"] }
-            },
-            "endpoints": { 
-                type: Type.ARRAY, 
-                items: { 
-                    type: Type.OBJECT,
-                    properties: {
-                        "id": { type: Type.STRING },
-                        "path": { type: Type.STRING },
-                        "method": { type: Type.STRING },
-                        "description": { type: Type.STRING }
-                    }
-                } 
-            }
-          }
-        },
-        migrationGuide: { type: Type.STRING },
-      },
-      required: ["manifestContent", "migrationGuide"],
-    },
-  },
-  required: ["scanId", "status", "scores", "issues", "artifacts"],
-};
-
 export async function performAudit(url: string, modelId: string): Promise<AuditResult> {
   // 1. Check for API Key existence before initializing SDK
   const apiKey = process.env.API_KEY;
@@ -74,6 +11,7 @@ export async function performAudit(url: string, modelId: string): Promise<AuditR
   // Initialize Gemini inside the function ensures fresh config/key usage
   const ai = new GoogleGenAI({ apiKey: apiKey });
 
+  // detailed prompt to enforce JSON structure since we cannot use responseSchema with tools
   const prompt = `
     You are UCP Guardian, an elite AI Auditor for Universal Commerce Protocol compliance.
     Target URL: ${url}
@@ -91,8 +29,33 @@ export async function performAudit(url: string, modelId: string): Promise<AuditR
     - Offer Clarity: Is pricing/inventory visible in search snippets?
     - Transaction: Is the checkout flow standard?
 
-    OUTPUT:
-    Return a valid JSON object matching the schema.
+    OUTPUT FORMAT:
+    You must return a VALID JSON object. 
+    Do not include any explanation text outside the JSON.
+    
+    The JSON object must match this structure:
+    {
+      "scanId": "string",
+      "status": "completed",
+      "scores": {
+        "total": number (0-100),
+        "discovery": number (0-100),
+        "offerClarity": number (0-100),
+        "transaction": number (0-100)
+      },
+      "issues": [
+        {
+          "severity": "critical" | "warning" | "info",
+          "title": "string",
+          "description": "string",
+          "remediationId": "string (optional)"
+        }
+      ],
+      "artifacts": {
+        "manifestContent": { ...valid ucp.json object... },
+        "migrationGuide": "markdown string"
+      }
+    }
   `;
 
   try {
@@ -100,8 +63,9 @@ export async function performAudit(url: string, modelId: string): Promise<AuditR
       model: modelId, 
       contents: prompt,
       config: {
-        responseMimeType: "application/json",
-        responseSchema: AUDIT_SCHEMA,
+        // REMOVED: responseMimeType: "application/json" and responseSchema
+        // These are incompatible with tools: [{ googleSearch: {} }] in the current API version.
+        // We rely on the prompt to enforce JSON structure.
         tools: [{ googleSearch: {} }]
       },
     });
