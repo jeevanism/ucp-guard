@@ -96,13 +96,14 @@ export async function performAudit(url: string): Promise<AuditResult> {
   `;
 
   try {
+    // SWITCHING TO GEMINI 2.0 FLASH for higher rate limits on Free Tier
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-2.0-flash", 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: AUDIT_SCHEMA,
-        thinkingConfig: { thinkingBudget: 2048 },
+        // thinkingConfig is removed as it is not supported on standard Flash 2.0 and consumes high quota
         tools: [{ googleSearch: {} }]
       },
     });

@@ -14,7 +14,7 @@ interface ScannerPageProps {
 const SCAN_LOGS = [
   { icon: Terminal, text: "Initializing UCP Guardian Protocol v2.1..." },
   { icon: Search, text: "Connecting to Google Search Grounding Index..." },
-  { icon: BrainCircuit, text: "Gemini 3 Pro: Analyzing Domain Structure..." },
+  { icon: BrainCircuit, text: "Gemini 2.0 Flash: Analyzing Domain Structure..." },
   { icon: Lock, text: "Verifying HTTPS & SSL Handshake Compliance..." },
   { icon: Cpu, text: "Reasoning: Evaluating Agent Readability Scores..." },
   { icon: ShieldCheck, text: "Generating Compliance Manifest & Migration Guide..." },
@@ -67,8 +67,13 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
       console.error("Scan failed", error);
       setIsScanning(false);
       
-      if (error.message === "MISSING_API_KEY") {
+      const errorMessage = error?.message || "";
+      const errorString = JSON.stringify(error);
+
+      if (errorMessage === "MISSING_API_KEY") {
         setScanError("API KEY REQUIRED: Create a .env file with API_KEY=... or use 'demo' in URL.");
+      } else if (errorMessage.includes("429") || errorString.includes("429") || errorString.includes("RESOURCE_EXHAUSTED")) {
+        setScanError("RATE LIMIT EXCEEDED: Google API quota reached. Please wait 60s or use 'demo' URL.");
       } else {
         setScanError("SCAN FAILED: Connection interrupted. Please try again.");
       }
@@ -87,7 +92,7 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
         <p className="text-zinc-400 text-lg md:text-xl max-w-lg mx-auto leading-relaxed">
           AI Agent Readiness & Compliance Scanner. 
           <span className="block mt-2 text-sm text-zinc-500 font-mono">
-            Powered by Gemini 3 Pro (Thinking)
+            Powered by Gemini 2.0 Flash
           </span>
         </p>
       </div>
