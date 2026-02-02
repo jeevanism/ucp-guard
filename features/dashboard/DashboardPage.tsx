@@ -191,7 +191,8 @@ export function DashboardPage({ data, onBack }: DashboardPageProps) {
                 </div>
              </div>
            )}
-          <IssueList issues={data.issues} />
+          {/* UPDATED: Passing URL to IssueList for context-aware patching */}
+          <IssueList issues={data.issues} url={data.url} />
         </div>
 
         {/* Sidebar */}

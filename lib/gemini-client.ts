@@ -141,3 +141,51 @@ export async function performAudit(url: string, modelId: string): Promise<AuditR
     throw new Error(`Audit Failed: The AI model (${modelId}) is currently unavailable. Please try selecting 'Gemini 2.5 Flash' manually.`);
   }
 }
+
+/**
+ * Generates a specific code patch for a given vulnerability.
+ */
+export async function generatePatch(url: string, title: string, description: string): Promise<string> {
+  const apiKey = process.env.API_KEY;
+  // If no API key, return a mock response to prevent crashing in demo mode
+  if (!apiKey || apiKey === "" || apiKey.includes("your_actual_api_key")) {
+     return `<!-- DEMO MODE: REAL API KEY REQUIRED FOR LIVE GENERATION -->\n<!-- Mock Patch for: ${title} -->\n\n<meta name="ucp-compliance" content="true" />\n<link rel="manifest" href="/ucp.json" />`;
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  
+  const prompt = `
+  You are an expert Web Security & SEO Engineer (Google Gemini 2.5).
+  
+  Context:
+  Target Website: ${url}
+  Vulnerability: "${title}"
+  Description: "${description}"
+
+  Task: 
+  Generate the EXACT code snippet required to patch this issue. 
+  - If it's a missing manifest, provide the JSON.
+  - If it's a meta tag, provide the HTML.
+  - If it's a server config, provide the Nginx/Apache rules.
+  
+  Constraints:
+  - Output ONLY the code.
+  - Do NOT wrap in markdown backticks (no \`\`\`).
+  - Do NOT add explanations.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash", // Use Flash for fast code generation
+      contents: prompt
+    });
+
+    let text = response.text || "";
+    // Clean up if the model adds markdown despite instructions
+    text = text.replace(/^```[a-z]*\n/i, '').replace(/\n```$/, '');
+    return text;
+  } catch (e) {
+    console.error("Patch generation failed", e);
+    return "// Error generating patch. Please check API Key or try again.";
+  }
+}
