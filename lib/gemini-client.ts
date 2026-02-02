@@ -65,8 +65,14 @@ const AUDIT_SCHEMA = {
 };
 
 export async function performAudit(url: string): Promise<AuditResult> {
+  // 1. Check for API Key existence before initializing SDK
+  const apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey.includes("your_actual_api_key") || apiKey === "") {
+    throw new Error("MISSING_API_KEY");
+  }
+
   // Initialize Gemini inside the function ensures fresh config/key usage
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: apiKey });
 
   const prompt = `
     You are UCP Guardian, an elite AI Auditor for Universal Commerce Protocol compliance.
@@ -125,29 +131,6 @@ export async function performAudit(url: string): Promise<AuditResult> {
 
   } catch (error) {
     console.error("Gemini Audit Failed:", error);
-    
-    // Fallback error state
-    return {
-      scanId: `err-${Date.now()}`,
-      url,
-      status: "failed",
-      scores: { total: 0, discovery: 0, offerClarity: 0, transaction: 0 },
-      issues: [
-        {
-          severity: "critical",
-          title: "Audit Connection Failed",
-          description: "Unable to reach the UCP Guardian Intelligence Network.",
-        }
-      ],
-      artifacts: {
-        manifestContent: { 
-            ucp_version: "1.0",
-            domain: url,
-            capabilities: [],
-            endpoints: []
-        },
-        migrationGuide: "# Error\nCould not generate report."
-      }
-    };
+    throw error; // Re-throw to be handled by the UI
   }
 }

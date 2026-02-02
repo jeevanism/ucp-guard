@@ -24,6 +24,7 @@ const SCAN_LOGS = [
 export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [logIndex, setLogIndex] = useState(0);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   // Cycling logs effect
   useEffect(() => {
@@ -36,6 +37,7 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
 
   const handleScanStart = async (url: string) => {
     setIsScanning(true);
+    setScanError(null);
     setLogIndex(0);
     try {
       const startTime = Date.now();
@@ -61,9 +63,15 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
       await new Promise(r => setTimeout(r, 600)); 
       
       onAuditComplete(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Scan failed", error);
       setIsScanning(false);
+      
+      if (error.message === "MISSING_API_KEY") {
+        setScanError("API KEY REQUIRED: Create a .env file with API_KEY=... or use 'demo' in URL.");
+      } else {
+        setScanError("SCAN FAILED: Connection interrupted. Please try again.");
+      }
     }
   };
 
@@ -85,7 +93,11 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
       </div>
 
       {!isScanning ? (
-        <UrlForm onScanStart={handleScanStart} isLoading={isScanning} />
+        <UrlForm 
+          onScanStart={handleScanStart} 
+          isLoading={isScanning} 
+          serverError={scanError}
+        />
       ) : (
         <Card className="w-full max-w-lg border-indigo-500/30 bg-zinc-900/80 backdrop-blur-sm shadow-2xl shadow-indigo-500/10">
           <CardContent className="p-8 space-y-6">

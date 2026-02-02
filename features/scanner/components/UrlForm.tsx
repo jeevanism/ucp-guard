@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
-import { ShieldAlert, Terminal } from "lucide-react";
+import { ShieldAlert, Terminal, AlertTriangle } from "lucide-react";
 
 interface UrlFormProps {
   onScanStart: (url: string) => void;
   isLoading: boolean;
+  serverError?: string | null;
 }
 
-export function UrlForm({ onScanStart, isLoading }: UrlFormProps) {
+export function UrlForm({ onScanStart, isLoading, serverError }: UrlFormProps) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -51,9 +52,19 @@ export function UrlForm({ onScanStart, isLoading }: UrlFormProps) {
               disabled={isLoading}
             />
             {error && (
-              <div className="flex items-center gap-2 text-red-400 text-xs font-mono mt-2">
+              <div className="flex items-center gap-2 text-red-400 text-xs font-mono mt-2 animate-in slide-in-from-top-1">
                 <ShieldAlert className="h-3 w-3" />
                 {error}
+              </div>
+            )}
+            
+            {serverError && (
+              <div className="flex items-start gap-2 text-amber-400 bg-amber-950/20 border border-amber-900/50 p-3 rounded-md text-xs font-mono mt-2 animate-in slide-in-from-top-1">
+                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                    <p className="font-bold">SYSTEM ERROR</p>
+                    <p>{serverError}</p>
+                </div>
               </div>
             )}
           </div>
