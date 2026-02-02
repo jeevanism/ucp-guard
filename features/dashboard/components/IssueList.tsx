@@ -94,7 +94,8 @@ export function IssueList({ issues, url }: IssueListProps) {
                   </div>
                 </div>
                 
-                {!isFixed && issue.remediationId && (
+                {/* UPDATED: Button is now available for ALL non-fixed issues to showcase Generative capabilities */}
+                {!isFixed && (
                   <div className="pl-12 mt-2">
                     <Button 
                       variant="outline" 
