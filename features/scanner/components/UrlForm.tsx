@@ -23,28 +23,29 @@ interface UrlFormProps {
   serverError?: string | null;
 }
 
-// UPDATED: Using correct IDs from documentation
+// UPDATED: Using valid Model IDs from your `list-gemini` output
 const AVAILABLE_MODELS = [
   {
-    id: "gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
-    description: "Best balance of speed, stability, and rate limits.",
+    id: "gemini-2.5-flash",
+    name: "Gemini 2.5 Flash",
+    description: "Latest stable version. Balanced speed & intelligence.",
   },
   {
-    id: "gemini-2.0-flash-lite-preview-02-05",
+    id: "gemini-2.0-flash-lite",
     name: "Gemini 2.0 Flash Lite",
-    description: "Extremely fast, low cost. Good for simple JSON tasks.",
+    description: "Lowest cost, fastest response. Good for quick scans.",
   },
   {
-    id: "gemini-2.0-pro-exp-02-05",
-    name: "Gemini 2.0 Pro",
-    description: "High reasoning capability for complex audits.",
+    id: "gemini-2.5-pro",
+    name: "Gemini 2.5 Pro",
+    description: "Maximum reasoning power for deep compliance analysis.",
   },
 ];
 
 export function UrlForm({ onScanStart, isLoading, serverError }: UrlFormProps) {
   const [url, setUrl] = useState("");
-  const [modelId, setModelId] = useState("gemini-2.0-flash");
+  // Default to the newest stable Flash model
+  const [modelId, setModelId] = useState("gemini-2.5-flash");
   const [error, setError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -66,6 +67,8 @@ export function UrlForm({ onScanStart, isLoading, serverError }: UrlFormProps) {
 
   const isRateLimitError =
     serverError?.includes("RATE LIMIT") || serverError?.includes("429");
+  
+  const isNotFoundError = serverError?.includes("NOT FOUND") || serverError?.includes("404");
 
   return (
     <Card className="w-full max-w-lg border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
@@ -90,11 +93,11 @@ export function UrlForm({ onScanStart, isLoading, serverError }: UrlFormProps) {
             />
 
             {/* Model Selection - shown explicitly if there is an error, or if toggled */}
-            {(showSettings || isRateLimitError) && (
+            {(showSettings || isRateLimitError || isNotFoundError) && (
               <div
                 className={cn(
                   "p-3 rounded-md border text-sm space-y-2 animate-in slide-in-from-top-2",
-                  isRateLimitError
+                  (isRateLimitError || isNotFoundError)
                     ? "bg-amber-950/20 border-amber-900/50"
                     : "bg-zinc-950/50 border-zinc-800",
                 )}
@@ -127,16 +130,15 @@ export function UrlForm({ onScanStart, isLoading, serverError }: UrlFormProps) {
                     </div>
                   ))}
                 </div>
-                {isRateLimitError && (
+                {(isRateLimitError || isNotFoundError) && (
                   <p className="text-xs text-amber-500 mt-2 font-mono">
-                    * Recommendation: Switch to "Flash Lite" if you are hitting
-                    quotas.
+                    * Recommendation: Switch to "Gemini 2.5 Flash" if others fail.
                   </p>
                 )}
               </div>
             )}
 
-            {!showSettings && !isRateLimitError && (
+            {!showSettings && !isRateLimitError && !isNotFoundError && (
               <div
                 onClick={() => setShowSettings(true)}
                 className="text-xs text-zinc-500 cursor-pointer hover:text-indigo-400 flex items-center gap-1 w-fit"
@@ -157,7 +159,7 @@ export function UrlForm({ onScanStart, isLoading, serverError }: UrlFormProps) {
               <div
                 className={cn(
                   "flex items-start gap-2 p-3 rounded-md text-xs font-mono mt-2 animate-in slide-in-from-top-1",
-                  isRateLimitError
+                  (isRateLimitError || isNotFoundError)
                     ? "text-amber-400 bg-amber-950/20 border border-amber-900/50"
                     : "text-red-400 bg-red-950/20 border border-red-900/50",
                 )}
@@ -166,7 +168,7 @@ export function UrlForm({ onScanStart, isLoading, serverError }: UrlFormProps) {
                 <div className="space-y-1">
                   <p className="font-bold">SYSTEM ERROR</p>
                   <p>{serverError}</p>
-                  {isRateLimitError && (
+                  {(isRateLimitError || isNotFoundError) && (
                     <p
                       className="font-bold underline cursor-pointer"
                       onClick={() => setShowSettings(true)}
