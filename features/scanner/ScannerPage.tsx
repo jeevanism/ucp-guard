@@ -14,7 +14,7 @@ interface ScannerPageProps {
 const SCAN_LOGS = [
   { icon: Terminal, text: "Initializing UCP Guardian Protocol v2.1..." },
   { icon: Search, text: "Connecting to Google Search Grounding Index..." },
-  { icon: BrainCircuit, text: "Gemini 2.0 Flash: Analyzing Domain Structure..." },
+  { icon: BrainCircuit, text: "Gemini Model: Analyzing Domain Structure..." },
   { icon: Lock, text: "Verifying HTTPS & SSL Handshake Compliance..." },
   { icon: Cpu, text: "Reasoning: Evaluating Agent Readability Scores..." },
   { icon: ShieldCheck, text: "Generating Compliance Manifest & Migration Guide..." },
@@ -35,7 +35,7 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
     return () => clearInterval(interval);
   }, [isScanning]);
 
-  const handleScanStart = async (url: string) => {
+  const handleScanStart = async (url: string, modelId: string) => {
     setIsScanning(true);
     setScanError(null);
     setLogIndex(0);
@@ -49,7 +49,8 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
         console.log("Demo Mode Activated");
         result = await performMockAudit("https://demo-store.example.com");
       } else {
-        result = await performAudit(url);
+        // Pass selected model ID to the client
+        result = await performAudit(url, modelId);
       }
       
       // Ensure the animation plays for at least 4 seconds to look professional
@@ -73,7 +74,7 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
       if (errorMessage === "MISSING_API_KEY") {
         setScanError("API KEY REQUIRED: Create a .env file with API_KEY=... or use 'demo' in URL.");
       } else if (errorMessage.includes("429") || errorString.includes("429") || errorString.includes("RESOURCE_EXHAUSTED")) {
-        setScanError("RATE LIMIT EXCEEDED: Google API quota reached. Please wait 60s or use 'demo' URL.");
+        setScanError("RATE LIMIT EXCEEDED: Please select a different model (e.g., Flash Lite) from the options above.");
       } else {
         setScanError("SCAN FAILED: Connection interrupted. Please try again.");
       }
@@ -92,7 +93,7 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
         <p className="text-zinc-400 text-lg md:text-xl max-w-lg mx-auto leading-relaxed">
           AI Agent Readiness & Compliance Scanner. 
           <span className="block mt-2 text-sm text-zinc-500 font-mono">
-            Powered by Gemini 2.0 Flash
+            Powered by Google Gemini
           </span>
         </p>
       </div>

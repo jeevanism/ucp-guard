@@ -64,7 +64,7 @@ const AUDIT_SCHEMA = {
   required: ["scanId", "status", "scores", "issues", "artifacts"],
 };
 
-export async function performAudit(url: string): Promise<AuditResult> {
+export async function performAudit(url: string, modelId: string): Promise<AuditResult> {
   // 1. Check for API Key existence before initializing SDK
   const apiKey = process.env.API_KEY;
   if (!apiKey || apiKey.includes("your_actual_api_key") || apiKey === "") {
@@ -96,14 +96,12 @@ export async function performAudit(url: string): Promise<AuditResult> {
   `;
 
   try {
-    // SWITCHING TO GEMINI 2.0 FLASH for higher rate limits on Free Tier
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash", 
+      model: modelId, 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: AUDIT_SCHEMA,
-        // thinkingConfig is removed as it is not supported on standard Flash 2.0 and consumes high quota
         tools: [{ googleSearch: {} }]
       },
     });
