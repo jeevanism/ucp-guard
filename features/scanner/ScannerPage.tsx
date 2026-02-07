@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { UrlForm } from "./components/UrlForm";
-import { ShieldCheck, Cpu, Terminal, Loader2, Search, BrainCircuit, Lock } from "lucide-react";
+import {
+  ShieldCheck,
+  Cpu,
+  Terminal,
+  Loader2,
+  Search,
+  BrainCircuit,
+  Lock,
+} from "lucide-react";
 import { performAudit } from "../../lib/gemini-client";
 import { performAudit as performMockAudit } from "../../lib/mock-client";
 import { AuditResult } from "../../types";
@@ -19,7 +27,10 @@ const SCAN_LOGS = [
   { icon: BrainCircuit, text: "Gemini Model: Analyzing Domain Structure..." },
   { icon: Lock, text: "Verifying HTTPS & SSL Handshake Compliance..." },
   { icon: Cpu, text: "Reasoning: Evaluating Agent Readability Scores..." },
-  { icon: ShieldCheck, text: "Generating Compliance Manifest & Migration Guide..." },
+  {
+    icon: ShieldCheck,
+    text: "Generating Compliance Manifest & Migration Guide...",
+  },
   { icon: Terminal, text: "Finalizing Audit Report..." },
 ];
 
@@ -38,12 +49,17 @@ const safeStringify = (value: unknown) => {
   );
 };
 
-export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: ScannerPageProps) {
+export function ScannerPage({
+  onAuditComplete,
+  apiKey,
+  onApiKeyChange,
+}: ScannerPageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [logIndex, setLogIndex] = useState(0);
   const [scanError, setScanError] = useState<string | null>(null);
   const [scanErrorDetails, setScanErrorDetails] = useState<string | null>(null);
   const [showWaiting, setShowWaiting] = useState(false);
+  const [currentModel, setCurrentModel] = useState<string | null>(null);
 
   // Cycling logs effect
   useEffect(() => {
@@ -67,12 +83,17 @@ export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: Scanner
     return () => clearTimeout(t);
   }, [isScanning, logIndex]);
 
-  const handleScanStart = async (url: string, modelId: string, apiKey: string) => {
+  const handleScanStart = async (
+    url: string,
+    modelId: string,
+    apiKey: string,
+  ) => {
     setIsScanning(true);
     setScanError(null);
     setScanErrorDetails(null);
     setShowWaiting(false);
     setLogIndex(0);
+    setCurrentModel(modelId);
     try {
       const startTime = Date.now();
       let result: AuditResult;
@@ -86,31 +107,39 @@ export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: Scanner
         // Pass selected model ID to the client
         result = await performAudit(url, modelId, apiKey);
       }
-      
+
       // Ensure the animation plays for at least 4 seconds to look professional
       const elapsed = Date.now() - startTime;
       if (elapsed < 4000) {
-        await new Promise(r => setTimeout(r, 4000 - elapsed));
+        await new Promise((r) => setTimeout(r, 4000 - elapsed));
       }
 
       // Fast-forward logs to completion for visual satisfaction
       setLogIndex(SCAN_LOGS.length - 1);
-      await new Promise(r => setTimeout(r, 600)); 
-      
+      await new Promise((r) => setTimeout(r, 600));
+
       onAuditComplete(result);
     } catch (error: any) {
       console.error("Scan failed", error);
       setIsScanning(false);
-      
+
       const errorMessage = error?.message || "";
       const errorString = JSON.stringify(error);
       const debugPayload = error?.debug ?? error;
       setScanErrorDetails(safeStringify(debugPayload));
 
       if (errorMessage === "MISSING_API_KEY") {
-        setScanError("API KEY REQUIRED: Enter your Gemini API key above or use 'demo' in URL.");
-      } else if (errorMessage.includes("429") || errorString.includes("429") || errorString.includes("RESOURCE_EXHAUSTED")) {
-        setScanError("RATE LIMIT EXCEEDED: Please select a different model (e.g., Flash Lite) from the options above.");
+        setScanError(
+          "API KEY REQUIRED: Enter your Gemini API key above or use 'demo' in URL.",
+        );
+      } else if (
+        errorMessage.includes("429") ||
+        errorString.includes("429") ||
+        errorString.includes("RESOURCE_EXHAUSTED")
+      ) {
+        setScanError(
+          "RATE LIMIT EXCEEDED: Please select a different model (e.g., Flash Lite) from the options above.",
+        );
       } else {
         setScanError("SCAN FAILED: Connection interrupted. Please try again.");
       }
@@ -128,19 +157,19 @@ export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: Scanner
           UCP <span className="text-indigo-500">GUARDIAN</span>
         </h1>
         <p className="text-zinc-400 text-lg md:text-xl max-w-lg mx-auto leading-relaxed">
-          AI Agent Readiness & Compliance Scanner. 
+          AI Agent Readiness & Compliance Scanner.
           <span className="block mt-2 text-sm text-zinc-500 font-mono">
-            Powered by Google Gemini
+            Powered by Google Gemini 3
           </span>
         </p>
       </div>
 
       {!isScanning ? (
-        <UrlForm 
-          onScanStart={handleScanStart} 
+        <UrlForm
+          onScanStart={handleScanStart}
           apiKey={apiKey}
           onApiKeyChange={onApiKeyChange}
-          isLoading={isScanning} 
+          isLoading={isScanning}
           serverError={scanError}
           serverErrorDetails={scanErrorDetails}
         />
@@ -150,11 +179,22 @@ export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: Scanner
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Loader2 className="h-5 w-5 text-indigo-500 animate-spin" />
-                <span className="text-sm font-mono text-indigo-400 font-bold tracking-wider">SYSTEM_ACTIVE</span>
+                <span className="text-sm font-mono text-indigo-400 font-bold tracking-wider">
+                  SYSTEM_ACTIVE
+                </span>
               </div>
-              <span className="text-xs font-mono text-zinc-600">ID: {Math.random().toString(36).substring(2, 8).toUpperCase()}</span>
+              <div className="text-right space-y-1">
+                <span className="block text-xs font-mono text-zinc-600">
+                  ID: {Math.random().toString(36).substring(2, 8).toUpperCase()}
+                </span>
+                {currentModel && (
+                  <span className="block text-[10px] font-mono text-indigo-400">
+                    MODEL: {currentModel}
+                  </span>
+                )}
+              </div>
             </div>
-            
+
             <div className="space-y-4 font-mono text-sm">
               {SCAN_LOGS.map((log, idx) => {
                 const Icon = log.icon;
@@ -163,23 +203,29 @@ export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: Scanner
                 const isPending = idx > logIndex;
 
                 return (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     className={cn(
                       "flex items-center gap-3 transition-all duration-300",
                       isActive ? "text-white scale-105 ml-2" : "text-zinc-500",
                       isPending && "opacity-30 blur-[1px]",
-                      isDone && "text-emerald-500/70"
+                      isDone && "text-emerald-500/70",
                     )}
                   >
-                    <div className={cn(
-                      "p-1 rounded",
-                      isActive ? "bg-indigo-500/20 text-indigo-400" : "bg-transparent"
-                    )}>
+                    <div
+                      className={cn(
+                        "p-1 rounded",
+                        isActive
+                          ? "bg-indigo-500/20 text-indigo-400"
+                          : "bg-transparent",
+                      )}
+                    >
                       <Icon className="h-4 w-4" />
                     </div>
                     <span>{log.text}</span>
-                    {isDone && <ShieldCheck className="h-3 w-3 ml-auto text-emerald-500" />}
+                    {isDone && (
+                      <ShieldCheck className="h-3 w-3 ml-auto text-emerald-500" />
+                    )}
                   </div>
                 );
               })}
@@ -193,19 +239,23 @@ export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: Scanner
                   <span>gemini request in progress</span>
                   <span className="flex gap-1">
                     <span className="animate-pulse">•</span>
-                    <span className="animate-pulse [animation-delay:150ms]">•</span>
-                    <span className="animate-pulse [animation-delay:300ms]">•</span>
+                    <span className="animate-pulse [animation-delay:150ms]">
+                      •
+                    </span>
+                    <span className="animate-pulse [animation-delay:300ms]">
+                      •
+                    </span>
                   </span>
                 </div>
               </div>
             )}
-            
+
             <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden mt-6">
-              <div 
+              <div
                 className="h-full bg-indigo-500"
-                style={{ 
+                style={{
                   width: `${((logIndex + 1) / SCAN_LOGS.length) * 100}%`,
-                  transition: "width 0.5s ease-out"
+                  transition: "width 0.5s ease-out",
                 }}
               />
             </div>

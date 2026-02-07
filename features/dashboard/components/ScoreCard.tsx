@@ -5,11 +5,12 @@ import { cn } from "../../../lib/utils";
 interface ScoreCardProps {
   title: string;
   score: number;
+  modelUsed?: string;
   description?: string;
   details?: string[];
 }
 
-export function ScoreCard({ title, score, description, details }: ScoreCardProps) {
+export function ScoreCard({ title, score, modelUsed, description, details }: ScoreCardProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
@@ -27,8 +28,13 @@ export function ScoreCard({ title, score, description, details }: ScoreCardProps
   return (
     <Card className="border-zinc-800 bg-zinc-900/50">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-zinc-400 font-mono uppercase tracking-wider">
-          {title}
+        <CardTitle className="text-sm font-medium text-zinc-400 font-mono uppercase tracking-wider flex items-center gap-2">
+          <span>{title}</span>
+          {modelUsed && (
+            <span className="text-[10px] text-indigo-400 border border-indigo-500/40 px-1.5 py-0.5 rounded bg-indigo-950/40">
+              {modelUsed}
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>

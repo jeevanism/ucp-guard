@@ -93,6 +93,7 @@ export function DashboardPage({ data, apiKey, onBack }: DashboardPageProps) {
     const report = {
       target: data.url,
       scanId: data.scanId,
+      modelUsed: data.modelUsed,
       timestamp: new Date().toISOString(),
       scores: data.scores,
       issues: data.issues
@@ -123,7 +124,7 @@ export function DashboardPage({ data, apiKey, onBack }: DashboardPageProps) {
             TARGET: <span className="text-indigo-400 font-mono bg-indigo-950/30 px-2 py-1 rounded text-lg truncate max-w-[250px] md:max-w-[400px]">{data.url}</span>
           </h2>
           <p className="text-zinc-500 text-sm mt-1 font-mono">
-            ID: {data.scanId} • STATUS: <span className="text-emerald-500 uppercase">{data.status}</span>
+            ID: {data.scanId} • STATUS: <span className="text-emerald-500 uppercase">{data.status}</span> • MODEL: <span className="text-indigo-400">{data.modelUsed}</span>
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
@@ -143,6 +144,7 @@ export function DashboardPage({ data, apiKey, onBack }: DashboardPageProps) {
         <ScoreCard 
           title="Overall Readiness" 
           score={data.scores.total} 
+          modelUsed={data.modelUsed}
           description="Weighted average of all agent-interaction metrics."
           details={[
             "Signal blend across Discovery, Offer Clarity, and Transaction.",
@@ -153,6 +155,7 @@ export function DashboardPage({ data, apiKey, onBack }: DashboardPageProps) {
         <ScoreCard 
           title="Discovery" 
           score={data.scores.discovery}
+          modelUsed={data.modelUsed}
           description="Manifest availability and SEO meta-data."
           details={[
             "Presence of `ucp.json`-style manifest structure.",
@@ -163,6 +166,7 @@ export function DashboardPage({ data, apiKey, onBack }: DashboardPageProps) {
         <ScoreCard 
           title="Offer Clarity" 
           score={data.scores.offerClarity}
+          modelUsed={data.modelUsed}
           description="Price/Inventory readability by LLMs."
           details={[
             "Explicit price, currency, and availability fields.",
@@ -173,6 +177,7 @@ export function DashboardPage({ data, apiKey, onBack }: DashboardPageProps) {
         <ScoreCard 
           title="Transaction" 
           score={data.scores.transaction}
+          modelUsed={data.modelUsed}
           description="API endpoint security and checkout flow."
           details={[
             "Clarity of checkout flow and call-to-action steps.",
