@@ -9,6 +9,8 @@ import { cn } from "../../lib/utils";
 
 interface ScannerPageProps {
   onAuditComplete: (result: AuditResult) => void;
+  apiKey: string;
+  onApiKeyChange: (value: string) => void;
 }
 
 const SCAN_LOGS = [
@@ -21,10 +23,27 @@ const SCAN_LOGS = [
   { icon: Terminal, text: "Finalizing Audit Report..." },
 ];
 
-export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
+const safeStringify = (value: unknown) => {
+  const seen = new WeakSet();
+  return JSON.stringify(
+    value,
+    (_key, val) => {
+      if (typeof val === "object" && val !== null) {
+        if (seen.has(val as object)) return "[Circular]";
+        seen.add(val as object);
+      }
+      return val;
+    },
+    2,
+  );
+};
+
+export function ScannerPage({ onAuditComplete, apiKey, onApiKeyChange }: ScannerPageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [logIndex, setLogIndex] = useState(0);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [scanErrorDetails, setScanErrorDetails] = useState<string | null>(null);
+  const [showWaiting, setShowWaiting] = useState(false);
 
   // Cycling logs effect
   useEffect(() => {
@@ -35,9 +54,24 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
     return () => clearInterval(interval);
   }, [isScanning]);
 
-  const handleScanStart = async (url: string, modelId: string) => {
+  useEffect(() => {
+    if (!isScanning) {
+      setShowWaiting(false);
+      return;
+    }
+    if (logIndex < SCAN_LOGS.length - 1) {
+      setShowWaiting(false);
+      return;
+    }
+    const t = setTimeout(() => setShowWaiting(true), 1800);
+    return () => clearTimeout(t);
+  }, [isScanning, logIndex]);
+
+  const handleScanStart = async (url: string, modelId: string, apiKey: string) => {
     setIsScanning(true);
     setScanError(null);
+    setScanErrorDetails(null);
+    setShowWaiting(false);
     setLogIndex(0);
     try {
       const startTime = Date.now();
@@ -50,7 +84,7 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
         result = await performMockAudit("https://demo-store.example.com");
       } else {
         // Pass selected model ID to the client
-        result = await performAudit(url, modelId);
+        result = await performAudit(url, modelId, apiKey);
       }
       
       // Ensure the animation plays for at least 4 seconds to look professional
@@ -70,14 +104,17 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
       
       const errorMessage = error?.message || "";
       const errorString = JSON.stringify(error);
+      const debugPayload = error?.debug ?? error;
+      setScanErrorDetails(safeStringify(debugPayload));
 
       if (errorMessage === "MISSING_API_KEY") {
-        setScanError("API KEY REQUIRED: Create a .env file with API_KEY=... or use 'demo' in URL.");
+        setScanError("API KEY REQUIRED: Enter your Gemini API key above or use 'demo' in URL.");
       } else if (errorMessage.includes("429") || errorString.includes("429") || errorString.includes("RESOURCE_EXHAUSTED")) {
         setScanError("RATE LIMIT EXCEEDED: Please select a different model (e.g., Flash Lite) from the options above.");
       } else {
         setScanError("SCAN FAILED: Connection interrupted. Please try again.");
       }
+    } finally {
     }
   };
 
@@ -101,8 +138,11 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
       {!isScanning ? (
         <UrlForm 
           onScanStart={handleScanStart} 
+          apiKey={apiKey}
+          onApiKeyChange={onApiKeyChange}
           isLoading={isScanning} 
           serverError={scanError}
+          serverErrorDetails={scanErrorDetails}
         />
       ) : (
         <Card className="w-full max-w-lg border-indigo-500/30 bg-zinc-900/80 backdrop-blur-sm shadow-2xl shadow-indigo-500/10">
@@ -144,6 +184,21 @@ export function ScannerPage({ onAuditComplete }: ScannerPageProps) {
                 );
               })}
             </div>
+
+            {showWaiting && (
+              <div className="mt-3 space-y-1 text-xs font-mono text-zinc-400">
+                <div>Waiting for Gemini response…</div>
+                <div className="flex items-center gap-2 text-zinc-500">
+                  <span className="text-indigo-400">TRACE</span>
+                  <span>gemini request in progress</span>
+                  <span className="flex gap-1">
+                    <span className="animate-pulse">•</span>
+                    <span className="animate-pulse [animation-delay:150ms]">•</span>
+                    <span className="animate-pulse [animation-delay:300ms]">•</span>
+                  </span>
+                </div>
+              </div>
+            )}
             
             <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden mt-6">
               <div 

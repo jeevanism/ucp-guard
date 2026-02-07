@@ -7,6 +7,7 @@ import { ArrowLeft, Download, FileJson, CheckCircle2, Eye, X, Copy, Check } from
 
 interface DashboardPageProps {
   data: AuditResult;
+  apiKey: string;
   onBack: () => void;
 }
 
@@ -61,7 +62,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
   );
 };
 
-export function DashboardPage({ data, onBack }: DashboardPageProps) {
+export function DashboardPage({ data, apiKey, onBack }: DashboardPageProps) {
   const [previewArtifact, setPreviewArtifact] = useState<'none' | 'manifest' | 'guide'>('none');
   const [copied, setCopied] = useState(false);
 
@@ -143,21 +144,41 @@ export function DashboardPage({ data, onBack }: DashboardPageProps) {
           title="Overall Readiness" 
           score={data.scores.total} 
           description="Weighted average of all agent-interaction metrics."
+          details={[
+            "Signal blend across Discovery, Offer Clarity, and Transaction.",
+            "Penalizes missing artifacts and ambiguous pricing states.",
+            "Reflects AI-readability rather than real-world runtime checks.",
+          ]}
         />
         <ScoreCard 
           title="Discovery" 
           score={data.scores.discovery}
           description="Manifest availability and SEO meta-data."
+          details={[
+            "Presence of `ucp.json`-style manifest structure.",
+            "Basic metadata for agents (name, offers, URLs).",
+            "Search visibility signals from public page context.",
+          ]}
         />
         <ScoreCard 
           title="Offer Clarity" 
           score={data.scores.offerClarity}
           description="Price/Inventory readability by LLMs."
+          details={[
+            "Explicit price, currency, and availability fields.",
+            "Consistent offer naming and unique identifiers.",
+            "Low ambiguity for multi-variant items.",
+          ]}
         />
         <ScoreCard 
           title="Transaction" 
           score={data.scores.transaction}
           description="API endpoint security and checkout flow."
+          details={[
+            "Clarity of checkout flow and call-to-action steps.",
+            "Secure transport and basic policy hints.",
+            "Agent-friendly confirmation and receipt signals.",
+          ]}
         />
       </div>
 
@@ -192,7 +213,7 @@ export function DashboardPage({ data, onBack }: DashboardPageProps) {
              </div>
            )}
           {/* UPDATED: Passing URL to IssueList for context-aware patching */}
-          <IssueList issues={data.issues} url={data.url} />
+          <IssueList issues={data.issues} url={data.url} apiKey={apiKey} />
         </div>
 
         {/* Sidebar */}

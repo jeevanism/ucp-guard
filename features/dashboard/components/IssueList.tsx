@@ -10,9 +10,10 @@ import { PatchModal } from "./PatchModal";
 interface IssueListProps {
   issues: AuditResult['issues'];
   url: string;
+  apiKey: string;
 }
 
-export function IssueList({ issues, url }: IssueListProps) {
+export function IssueList({ issues, url, apiKey }: IssueListProps) {
   const [fixing, setFixing] = useState<string | null>(null);
   const [fixedIssues, setFixedIssues] = useState<Set<number>>(new Set());
   
@@ -37,7 +38,8 @@ export function IssueList({ issues, url }: IssueListProps) {
     
     try {
       // 1. Generate the Code
-      const code = await generatePatch(url, issue.title, issue.description);
+      const normalizedKey = apiKey?.trim();
+      const code = await generatePatch(url, issue.title, issue.description, normalizedKey);
       
       // 2. Open Modal
       setCurrentPatch({ title: issue.title, code });

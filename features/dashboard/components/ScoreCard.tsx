@@ -6,9 +6,10 @@ interface ScoreCardProps {
   title: string;
   score: number;
   description?: string;
+  details?: string[];
 }
 
-export function ScoreCard({ title, score, description }: ScoreCardProps) {
+export function ScoreCard({ title, score, description, details }: ScoreCardProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
@@ -43,6 +44,16 @@ export function ScoreCard({ title, score, description }: ScoreCardProps) {
         </div>
         {description && (
           <p className="mt-2 text-xs text-zinc-500">{description}</p>
+        )}
+        {details && details.length > 0 && (
+          <div className="mt-2 text-[11px] text-zinc-400 space-y-1">
+            {details.map((line, idx) => (
+              <div key={idx} className="flex items-start gap-2">
+                <span className="text-indigo-400">•</span>
+                <span>{line}</span>
+              </div>
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>
