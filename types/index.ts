@@ -1,6 +1,7 @@
 export interface AuditResult {
   scanId: string;
   url: string;
+  modelUsed: string;
   status: 'processing' | 'completed' | 'failed';
   scores: {
     total: number; // 0-100

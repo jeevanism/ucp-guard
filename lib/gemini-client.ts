@@ -117,7 +117,12 @@ export async function performAudit(url: string, modelId: string, apiKey: string)
 
     const data = extractJson(text);
     if (data) {
-      return { ...data, scanId: data.scanId || `gen-${Math.random().toString(36).substring(2, 9)}`, url };
+      return { 
+        ...data, 
+        scanId: data.scanId || `gen-${Math.random().toString(36).substring(2, 9)}`, 
+        url,
+        modelUsed: modelId,
+      };
     }
     
     throw new Error("Primary scan failed (empty response or tool error)");
@@ -126,7 +131,7 @@ export async function performAudit(url: string, modelId: string, apiKey: string)
     // ATTEMPT 2: Fallback (Pure Reasoning with Safe Model)
     // CRITICAL FIX: We switch to 'gemini-2.5-flash' which is listed as available in your environment.
     // We also remove tools to reduce complexity and avoid tool-related errors.
-    const fallbackModel = "gemini-2.5-flash";
+    const fallbackModel = "gemini-3-pro-preview";
     
     try {
       console.log(`[Audit] Fallback: Switching to ${fallbackModel} (Reasoning Mode)`);
@@ -145,7 +150,8 @@ export async function performAudit(url: string, modelId: string, apiKey: string)
         return { 
           ...fallbackData, 
           scanId: fallbackData.scanId || `fallback-${Math.random().toString(36).substring(2, 9)}`, 
-          url 
+          url,
+          modelUsed: fallbackModel,
         };
       }
     } catch (err) {
@@ -213,7 +219,7 @@ export async function generatePatch(
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash", // Use Flash for fast code generation
+      model: "gemini-3-flash-preview", // Use Gemini 3 Flash for fast code generation
       contents: prompt
     });
 

@@ -2,6 +2,7 @@ import { AuditResult } from "../types";
 
 const MOCK_DATA: Omit<AuditResult, 'url'> = {
   scanId: "scan_x92a-881b",
+  modelUsed: "demo-mock",
   status: "completed",
   scores: {
     total: 68,
