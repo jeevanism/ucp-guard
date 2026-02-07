@@ -14,6 +14,8 @@ import {
   AlertTriangle,
   Settings2,
   Check,
+  Database,
+  Loader2,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
@@ -26,22 +28,22 @@ interface UrlFormProps {
   serverErrorDetails?: string | null;
 }
 
-// UPDATED: Using valid Model IDs from your `list-gemini` output
+// UPDATED: Using Gemini 3 preview models from your `models` list output
 const AVAILABLE_MODELS = [
+  {
+    id: "gemini-3-flash-preview",
+    name: "Gemini 3 Flash Preview",
+    description: "Fastest Gemini 3 option. Best for live scans.",
+  },
+  {
+    id: "gemini-3-pro-preview",
+    name: "Gemini 3 Pro Preview",
+    description: "Maximum reasoning power for deep compliance analysis.",
+  },
   {
     id: "gemini-2.5-flash",
     name: "Gemini 2.5 Flash",
-    description: "Latest stable version. Balanced speed & intelligence.",
-  },
-  {
-    id: "gemini-2.0-flash-lite",
-    name: "Gemini 2.0 Flash Lite",
-    description: "Lowest cost, fastest response. Good for quick scans.",
-  },
-  {
-    id: "gemini-2.5-pro",
-    name: "Gemini 2.5 Pro",
-    description: "Maximum reasoning power for deep compliance analysis.",
+    description: "Stable fallback if Gemini 3 preview is rate-limited.",
   },
 ];
 
@@ -55,9 +57,47 @@ export function UrlForm({
 }: UrlFormProps) {
   const [url, setUrl] = useState("");
   // Default to the newest stable Flash model
-  const [modelId, setModelId] = useState("gemini-2.5-flash");
+  const [modelId, setModelId] = useState("gemini-3-flash-preview");
   const [error, setError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState<string | null>(null);
+  const [modelsList, setModelsList] = useState<
+    Array<{ name: string; displayName?: string }>
+  >([]);
+
+  const handleListModels = async () => {
+    const key = apiKey.trim();
+    if (!key) {
+      setModelsError("Enter a valid Gemini API key to list models.");
+      return;
+    }
+    setModelsLoading(true);
+    setModelsError(null);
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`,
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      const models = Array.isArray(data?.models) ? data.models : [];
+      const filtered = models
+        .filter(
+          (m: any) => typeof m?.name === "string" && m.name.includes("gemini"),
+        )
+        .map((m: any) => ({
+          name: String(m.name).replace(/^models\//, ""),
+          displayName: m.displayName ? String(m.displayName) : undefined,
+        }));
+      setModelsList(filtered);
+    } catch (e: any) {
+      setModelsError(e?.message || "Failed to load models.");
+    } finally {
+      setModelsLoading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +135,11 @@ export function UrlForm({
         </CardTitle>
         <CardDescription>
           Enter target storefront URL for AI readiness assessment.
+          <span className="block mt-2 text-[11px] text-zinc-500 font-mono">
+            Demo mode: use a URL containing{" "}
+            <span className="text-zinc-300">demo</span>. Live mode: enter a real
+            URL + valid Gemini API key.
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -170,10 +215,64 @@ export function UrlForm({
                 </div>
                 {(isRateLimitError || isNotFoundError) && (
                   <p className="text-xs text-amber-500 mt-2 font-mono">
-                    * Recommendation: Switch to "Gemini 2.5 Flash" if others
-                    fail.
+                    * Recommendation: Switch to "Gemini 2.5 Flash" if Gemini 3
+                    preview models fail.
                   </p>
                 )}
+
+                <div className="pt-2 border-t border-zinc-800/60">
+                  <button
+                    type="button"
+                    onClick={handleListModels}
+                    disabled={modelsLoading}
+                    className={cn(
+                      "inline-flex items-center gap-2 text-xs font-mono px-2 py-1 rounded border transition-colors",
+                      modelsLoading
+                        ? "border-zinc-800 text-zinc-500"
+                        : "border-indigo-900/50 text-indigo-300 hover:bg-indigo-950/30",
+                    )}
+                  >
+                    {modelsLoading ? (
+                      <>
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Fetching Models...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="h-3 w-3" />
+                        List Available Models
+                      </>
+                    )}
+                  </button>
+                  <p className="mt-1 text-[10px] text-zinc-500 font-mono">
+                    Uses your API key to query Gemini model access.
+                  </p>
+
+                  {modelsError && (
+                    <p className="mt-2 text-[10px] text-red-400 font-mono">
+                      {modelsError}
+                    </p>
+                  )}
+
+                  {modelsList.length > 0 && (
+                    <div className="mt-2 max-h-40 overflow-auto rounded border border-zinc-800 bg-zinc-950/60 p-2">
+                      {modelsList.map((m) => (
+                        <div
+                          key={m.name}
+                          className="text-[10px] text-zinc-300 font-mono"
+                        >
+                          <span className="text-indigo-300">{m.name}</span>
+                          {m.displayName && (
+                            <span className="text-zinc-500">
+                              {" "}
+                              — {m.displayName}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -183,7 +282,7 @@ export function UrlForm({
                 className="text-xs text-zinc-500 cursor-pointer hover:text-indigo-400 flex items-center gap-1 w-fit"
               >
                 <Settings2 className="h-3 w-3" />
-                <span>Configure GEMINI Model</span>
+                <span>Configure Gemini Model</span>
               </div>
             )}
 
@@ -220,7 +319,7 @@ export function UrlForm({
                       <summary className="cursor-pointer font-bold text-xs">
                         Show Full Gemini Request + Error
                       </summary>
-                      <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-zinc-950/80 p-2 text-[10px] text-zinc-300 border border-zinc-800">
+                      <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-md bg-zinc-950/80 p-2 text-[10px] text-zinc-300 border border-zinc-800">
                         {serverErrorDetails}
                       </pre>
                     </details>
