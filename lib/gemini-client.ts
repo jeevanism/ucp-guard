@@ -1,13 +1,23 @@
 import { GoogleGenAI, HarmBlockThreshold, HarmCategory, Type } from "@google/genai";
 import { AuditResult } from "../types";
 
-export async function performAudit(url: string, modelId: string): Promise<AuditResult> {
-  const apiKey = process.env.API_KEY;
+export async function performAudit(url: string, modelId: string, apiKey: string): Promise<AuditResult> {
   if (!apiKey || apiKey.includes("your_actual_api_key") || apiKey === "") {
     throw new Error("MISSING_API_KEY");
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
+  const requestMeta = {
+    url,
+    model: modelId,
+    tools: ["googleSearch"],
+    safetySettings: [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+    ],
+  };
 
   // 1. Define Prompt
   // We explicitly tell the model it is a security researcher to contextualize the "audit" request
@@ -74,28 +84,34 @@ export async function performAudit(url: string, modelId: string): Promise<AuditR
     return null;
   };
 
+  let primaryError: unknown = null;
+  let fallbackError: unknown = null;
+  let primaryFinishReason: string | null = null;
+
   try {
     // ATTEMPT 1: With Google Search (Preferred)
     console.log(`[Audit] Starting with model: ${modelId}`);
-    
-    // We wrap the API call to catch SDK-level errors immediately
-    const response = await ai.models.generateContent({
-      model: modelId, 
-      contents: prompt,
-      config: {
-        tools: [{ googleSearch: {} }],
-        safetySettings: safetySettings,
-      },
-    }).catch(err => {
-        console.warn(`[Audit] Primary scan failed with model ${modelId}:`, err);
-        return null; // Return null to trigger fallback
-    });
+    let response: any = null;
+    try {
+      response = await ai.models.generateContent({
+        model: modelId, 
+        contents: prompt,
+        config: {
+          tools: [{ googleSearch: {} }],
+          safetySettings: safetySettings,
+        },
+      });
+    } catch (err) {
+      primaryError = err;
+      console.warn(`[Audit] Primary scan failed with model ${modelId}:`, err);
+    }
 
     // Check if response exists and has content
     let text = response?.text;
     
     // If text is empty, check candidates for safety finish reason
     if (!text && response?.candidates?.[0]?.finishReason) {
+        primaryFinishReason = String(response.candidates[0].finishReason);
         console.warn(`[Audit] Blocked by finishReason: ${response.candidates[0].finishReason}`);
     }
 
@@ -132,21 +148,42 @@ export async function performAudit(url: string, modelId: string): Promise<AuditR
           url 
         };
       }
-    } catch (fallbackError) {
-      console.error("Fallback scan also failed:", fallbackError);
+    } catch (err) {
+      console.error("Fallback scan also failed:", err);
+      fallbackError = err;
     }
     
     // If we get here, both failed. 
     // Return a structured error that the UI can display nicely.
-    throw new Error(`Audit Failed: The AI model (${modelId}) is currently unavailable. Please try selecting 'Gemini 2.5 Flash' manually.`);
+    const finalError = new Error(`Audit Failed: The AI model (${modelId}) is currently unavailable. Please try selecting 'Gemini 2.5 Flash' manually.`);
+    (finalError as any).debug = {
+      request: {
+        ...requestMeta,
+        prompt,
+      },
+      primary: {
+        error: primaryError,
+        finishReason: primaryFinishReason,
+      },
+      fallback: {
+        model: fallbackModel,
+        error: fallbackError,
+      },
+      note: "API key redacted by design; request and prompt shown for transparency.",
+    };
+    throw finalError;
   }
 }
 
 /**
  * Generates a specific code patch for a given vulnerability.
  */
-export async function generatePatch(url: string, title: string, description: string): Promise<string> {
-  const apiKey = process.env.API_KEY;
+export async function generatePatch(
+  url: string,
+  title: string,
+  description: string,
+  apiKey?: string | null,
+): Promise<string> {
   // If no API key, return a mock response to prevent crashing in demo mode
   if (!apiKey || apiKey === "" || apiKey.includes("your_actual_api_key")) {
      return `<!-- DEMO MODE: REAL API KEY REQUIRED FOR LIVE GENERATION -->\n<!-- Mock Patch for: ${title} -->\n\n<meta name="ucp-compliance" content="true" />\n<link rel="manifest" href="/ucp.json" />`;

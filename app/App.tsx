@@ -9,6 +9,7 @@ type ViewState = 'scanner' | 'dashboard';
 export function App() {
   const [currentView, setCurrentView] = useState<ViewState>('scanner');
   const [auditData, setAuditData] = useState<AuditResult | null>(null);
+  const [apiKey, setApiKey] = useState<string>("");
 
   const handleAuditComplete = (result: AuditResult) => {
     setAuditData(result);
@@ -18,6 +19,7 @@ export function App() {
   const handleBackToScanner = () => {
     setAuditData(null);
     setCurrentView('scanner');
+    setApiKey("");
   };
 
   return (
@@ -44,10 +46,14 @@ export function App() {
 
       <main className="container mx-auto pt-24 pb-12 px-4">
         {currentView === 'scanner' && (
-          <ScannerPage onAuditComplete={handleAuditComplete} />
+          <ScannerPage
+            onAuditComplete={handleAuditComplete}
+            apiKey={apiKey}
+            onApiKeyChange={setApiKey}
+          />
         )}
         {currentView === 'dashboard' && auditData && (
-          <DashboardPage data={auditData} onBack={handleBackToScanner} />
+          <DashboardPage data={auditData} apiKey={apiKey} onBack={handleBackToScanner} />
         )}
       </main>
 
