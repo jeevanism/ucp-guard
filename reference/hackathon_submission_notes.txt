@@ -1,0 +1,259 @@
+Rules and undrserstanding for the Hasckathon submission
+
+version1
+
+Based on the text you provided, here is a breakdown of the rules, requirements, and strategy to help you get your entry submitted for the Gemini 3 Hackathon.
+
+### 🚨 URGENT: Timeline Alert
+
+**Current Date:** Feb 7, 2026
+**Submission Deadline:** **Feb 9, 2026, at 5:00 P.M. Pacific Time.**
+*You have approximately 48 hours remaining.* Do not miss this window.
+
+---
+
+### 1. Eligibility Check (Can you enter?)
+
+Before you finish building, ensure you meet these criteria:
+
+* **Location:** You generally cannot enter if you live in **Italy, Quebec (Canada)**, or US-sanctioned countries (Russia, Iran, North Korea, Syria, etc.).
+* **Age:** You must be the age of majority in your country (20+ in Taiwan).
+* **Affiliation:** You cannot be a Google employee, intern, contractor, or GDE.
+* **Team:** You can enter as an individual, a team, or an organization. If working as a team, one person must be the designated "Representative."
+
+### 2. The Core Requirement: What to Build
+
+* **The Tech:** You **must** use the **Gemini 3 API**.
+* **The State:** It must be a **NEW** application created during the contest period (Dec 17, 2025 – Feb 9, 2026). You cannot submit an old project or a slight modification of existing work.
+* **The Category:** There are no restrictions. It can be a game, productivity tool, scientific analyzer, etc., as long as Gemini 3 is central to its function.
+
+### 3. Submission Checklist (What you need to upload)
+
+To submit successfully on Devpost, you must provide the following four items. Missing any of these may disqualify you.
+
+**A. Text Description (~200 words)**
+
+* **Requirement:** Describe your application.
+* **Focus:** Specifically detail **how** you integrated Gemini 3. Explain which features (e.g., deep reasoning, multimodal capabilities) were used and why they are central to the app.
+
+**B. Public Project Link**
+
+* **Option 1 (Preferred):** A link to an **AI Studio app**. This allows judges to test it immediately.
+* **Option 2:** A URL to a working interactive demo or product website.
+* *Note:* This must be public. No logins or paywalls allowed for the judges.
+
+**C. Public Code Repository**
+
+* **Requirement:** A link to your code (GitHub, GitLab, etc.).
+* **Condition:** This is required *unless* you provided an AI Studio link in step B. Ideally, provide both if possible to show code quality.
+
+**D. Demonstration Video**
+
+* **Length:** **Maximum 3 minutes.** (Judges may stop watching after the 3-minute mark).
+* **Platform:** YouTube or Vimeo (must be public).
+* **Content:** Show the project actually functioning. Don't just talk about it; show the screen recording of the app in action.
+* **Language:** Spoken English or English subtitles are required.
+
+### 4. How to Win (Judging Criteria)
+
+The prize pool is $100,000. Here is how the judges are scoring you:
+
+1. **Technical Execution (40% - Highest Priority):**
+* Does the code actually work?
+* Is it buggy?
+* **Tip:** Ensure your error handling is solid. Based on the "Inspiration" text provided, they value "Reasoning" and "Self-Healing" code. If your app can fix its own errors using Gemini, that scores high here.
+
+
+2. **Innovation / "Wow" Factor (30%):**
+* Is this unique?
+* **Tip:** Avoid simple "chat wrappers." The text emphasizes "Agentic" workflows—apps that *do* things, not just talk.
+
+
+3. **Potential Impact (20%):**
+* Does this solve a real problem for a broad market?
+
+
+4. **Presentation (10%):**
+* Is the video clear? Is the documentation good?
+
+
+
+### 5. Next Steps for You
+
+1. **Record your video immediately.** Since you are close to the deadline, do not leave this for the last hour.
+2. **Double-check permissions.** Make sure your GitHub repo and YouTube video are set to **Public**, not Private.
+3. **Submit.** Go to `Gemini3.devpost.com` and fill out the form before Feb 9th, 5:00 PM PT.
+
+**Would you like me to help you draft the ~200-word text description for your submission if you tell me what your app does?**
+
+
+
+version2
+Below is a **clean, compressed reading of the rules**, organised by what actually constrains your submission. No interpretation beyond what is written.
+
+---
+
+## 1. What you are allowed to submit
+
+**Mandatory**
+
+* A **new application** created **during the contest period**.
+* Must **use the Gemini 3 API** in a *central* way (not decorative).
+* Any category is allowed.
+
+**Explicitly not allowed**
+
+* Extensions, refactors, or continuations of earlier projects.
+* Anything previously funded, commissioned, licensed, or supported by Google/Devpost.
+* Anything that reuses substantial prior work (yours or others’).
+
+---
+
+## 2. What “new” means in practice
+
+Your project must:
+
+* Be conceived and built **after 17 Dec 2025**.
+* Not be derived from an existing codebase, product, or prototype.
+* Not be a “v2”, “pilot”, or “internal rewrite”.
+
+Open-source libraries are allowed **only if**:
+
+* You comply with their licences.
+* Your contribution is clearly additive and original.
+
+---
+
+## 3. Required submission components (all mandatory)
+
+You must submit **all** of the following:
+
+1. **~200-word text**
+
+   * Focused *only* on:
+
+     * Which Gemini 3 features you used.
+     * Why those features are essential to the application.
+
+2. **Public working link**
+
+   * Live demo or AI Studio app.
+   * No login.
+   * No paywall.
+   * Judges must be able to test it freely.
+
+3. **Public code repository**
+
+   * Required unless you use AI Studio.
+   * Must reflect what the demo shows.
+
+4. **Demo video**
+
+   * Max **3 minutes** (hard cap).
+   * Public (YouTube or Vimeo).
+   * In English or with English subtitles.
+   * Must show the application actually working.
+
+Failure on any one of these = automatic failure at Stage One.
+
+---
+
+## 4. Judging structure (important for prioritisation)
+
+### Stage One (pass/fail)
+
+You are rejected if:
+
+* Any required element is missing.
+* The project does not clearly use Gemini 3.
+* The demo does not run or match the description.
+
+### Stage Two (scored)
+
+Weighting:
+
+* **Technical execution – 40%**
+* **Innovation / wow factor – 30%**
+* **Potential impact – 20%**
+* **Presentation – 10%**
+
+This means:
+
+* A technically strong but dull project will lose.
+* A flashy idea that barely works will lose.
+* The demo matters less than the system design, but still matters.
+
+---
+
+## 5. Eligibility constraints (hard exclusions)
+
+You **cannot** participate if:
+
+* You live in or are ordinarily resident in the listed excluded regions (Italy, Quebec, Russia, etc.).
+* You are under the age of majority in your jurisdiction.
+* You are employed by Google, Devpost, or directly involved contest entities.
+* Your participation creates a conflict of interest (Google decides this).
+
+If submitting via an employer:
+
+* You must have explicit permission.
+* Any prize is legally yours/employer’s responsibility.
+
+---
+
+## 6. Intellectual property (key points only)
+
+* **You keep ownership** of your project.
+* You grant Google a **perpetual, royalty-free licence** to:
+
+  * Evaluate it.
+  * Promote it (screenshots, clips, demos).
+
+You **must** guarantee:
+
+* You own all rights to the work.
+* No IP infringement.
+* No unauthorised third-party data or branding.
+
+---
+
+## 7. Timeline (non-negotiable)
+
+* **Submission deadline:**
+  9 Feb 2026, 5:00 PM Pacific Time
+* **Judging:**
+  10–27 Feb 2026
+* **Winners announced:**
+  ~4 Mar 2026
+
+No edits allowed after submission closes, except if Google explicitly asks you to remove infringing material.
+
+---
+
+## 8. Practical failure modes to avoid
+
+Automatic disqualification commonly comes from:
+
+* Reusing an old project.
+* Demo video longer than 3 minutes.
+* “Uses Gemini” without showing *why* Gemini is essential.
+* Private demo links.
+* Missing team members on Devpost.
+* Inconsistent demo vs code.
+
+---
+
+## 9. Final checklist (literal)
+
+Before submitting, confirm:
+
+* New project, built during contest window.
+* Gemini 3 is core, not peripheral.
+* Public demo works without credentials.
+* Public repo or AI Studio link exists.
+* Video ≤ 3 minutes and shows functionality.
+* All teammates added on Devpost.
+
+---
+
+If you want, the next step can be to **stress-test your specific project idea against these rules line-by-line**.

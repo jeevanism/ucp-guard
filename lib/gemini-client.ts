@@ -1,4 +1,4 @@
-import { GoogleGenAI, HarmBlockThreshold, HarmCategory, Type } from "@google/genai";
+import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from "@google/genai";
 import { AuditResult } from "../types";
 
 export async function performAudit(url: string, modelId: string, apiKey: string): Promise<AuditResult> {

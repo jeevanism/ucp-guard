@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ScannerPage } from "../features/scanner/ScannerPage";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { Shield } from "lucide-react";

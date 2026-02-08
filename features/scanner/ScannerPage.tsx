@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { UrlForm } from "./components/UrlForm";
 import {
   ShieldCheck,
@@ -157,9 +157,9 @@ export function ScannerPage({
           UCP <span className="text-indigo-500">GUARDIAN</span>
         </h1>
         <p className="text-zinc-400 text-lg md:text-xl max-w-lg mx-auto leading-relaxed">
-          AI Agent Readiness & Compliance Scanner.
+          Audits e-commerce stores for UCP readiness and generates a compliance report with auto-fix patches.
           <span className="block mt-2 text-sm text-zinc-500 font-mono">
-            Powered by Google Gemini 3
+            Powered by Google Gemini 3 (Flash/Pro)
           </span>
         </p>
       </div>

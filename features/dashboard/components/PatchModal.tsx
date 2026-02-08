@@ -1,7 +1,6 @@
-import React from 'react';
+import { useState } from 'react';
 import { X, Copy, Check, Terminal, Code2 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
-import { cn } from '../../../lib/utils';
 
 interface PatchModalProps {
     isOpen: boolean;
@@ -11,7 +10,7 @@ interface PatchModalProps {
 }
 
 export function PatchModal({ isOpen, onClose, title, code }: PatchModalProps) {
-    const [copied, setCopied] = React.useState(false);
+    const [copied, setCopied] = useState(false);
 
     if (!isOpen) return null;
 
