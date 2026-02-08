@@ -20,3 +20,11 @@ export interface AuditResult {
     migrationGuide: string; // Markdown content
   };
 }
+
+export interface AgentJourneyStep {
+  step: string;
+  status: "success" | "degraded" | "blocked";
+  reason: string;
+  agentImpact: string;
+  evidence?: string;
+}

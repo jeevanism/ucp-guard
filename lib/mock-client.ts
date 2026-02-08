@@ -1,4 +1,4 @@
-import { AuditResult } from "../types";
+import { AuditResult, AgentJourneyStep } from "../types";
 
 const MOCK_DATA: Omit<AuditResult, 'url'> = {
   scanId: "scan_x92a-881b",
@@ -70,3 +70,46 @@ export async function performAudit(url: string): Promise<AuditResult> {
     }, 2500);
   });
 }
+
+export const MOCK_JOURNEY: AgentJourneyStep[] = [
+  {
+    step: "Discover store entry point",
+    status: "success",
+    reason: "Homepage and product pages are publicly accessible.",
+    agentImpact: "Agent can start browsing the catalog.",
+  },
+  {
+    step: "Locate UCP manifest",
+    status: "blocked",
+    reason: "No ucp.json found at the root or well-known path.",
+    agentImpact: "Agent cannot reliably enumerate offers or policies.",
+    evidence: "Missing UCP Manifest",
+  },
+  {
+    step: "Parse product catalog",
+    status: "degraded",
+    reason: "Structured data is incomplete for products.",
+    agentImpact: "Higher risk of ambiguous product details.",
+    evidence: "Incomplete Schema.org",
+  },
+  {
+    step: "Resolve pricing & availability",
+    status: "blocked",
+    reason: "Prices are not machine-readable due to Shadow DOM usage.",
+    agentImpact: "Pricing may be hallucinated or unavailable.",
+    evidence: "Shadow DOM Pricing",
+  },
+  {
+    step: "Evaluate checkout path",
+    status: "degraded",
+    reason: "No agent-specific checkout signals or API hints found.",
+    agentImpact: "Agent may fail to complete a purchase reliably.",
+  },
+  {
+    step: "Confirm policies & transport",
+    status: "degraded",
+    reason: "Robots directives are not optimized for LLM crawlers.",
+    agentImpact: "Reduced indexing and discovery by agents.",
+    evidence: "Robots.txt Optimization",
+  },
+];

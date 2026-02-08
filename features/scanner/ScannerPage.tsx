@@ -19,6 +19,7 @@ interface ScannerPageProps {
   onAuditComplete: (result: AuditResult) => void;
   apiKey: string;
   onApiKeyChange: (value: string) => void;
+  onOpenAbout: () => void;
 }
 
 const SCAN_LOGS = [
@@ -53,6 +54,7 @@ export function ScannerPage({
   onAuditComplete,
   apiKey,
   onApiKeyChange,
+  onOpenAbout,
 }: ScannerPageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [logIndex, setLogIndex] = useState(0);
@@ -161,6 +163,12 @@ export function ScannerPage({
           <span className="block mt-2 text-sm text-zinc-500 font-mono">
             Powered by Google Gemini 3 (Flash/Pro)
           </span>
+          <button
+            onClick={onOpenAbout}
+            className="block mt-3 text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 font-mono"
+          >
+            About / How It Works
+          </button>
         </p>
       </div>
 

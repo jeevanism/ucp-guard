@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { AuditResult } from "../../types";
+import React, { useEffect, useState } from "react";
+import { AgentJourneyStep, AuditResult } from "../../types";
 import { ScoreCard } from "./components/ScoreCard";
 import { IssueList } from "./components/IssueList";
 import { Button } from "../../components/ui/button";
+import { generateAgentJourney } from "../../lib/gemini-client";
+import { MOCK_JOURNEY } from "../../lib/mock-client";
 import {
   ArrowLeft,
   Download,
@@ -110,6 +112,11 @@ export function DashboardPage({
     "none" | "manifest" | "guide"
   >("none");
   const [copied, setCopied] = useState(false);
+  const [journeyStatus, setJourneyStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [journeyError, setJourneyError] = useState<string | null>(null);
+  const [journeyData, setJourneyData] = useState<AgentJourneyStep[]>([]);
 
   const downloadFile = (filename: string, content: string, type: string) => {
     const blob = new Blob([content], { type });
@@ -164,6 +171,43 @@ export function DashboardPage({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  useEffect(() => {
+    setJourneyStatus("loading");
+    setJourneyError(null);
+
+    const isDemo =
+      data.modelUsed === "demo-mock" || data.url.toLowerCase().includes("demo");
+    if (isDemo) {
+      setJourneyData(MOCK_JOURNEY);
+      setJourneyStatus("success");
+      return;
+    }
+
+    const key = apiKey?.trim();
+    if (!key) {
+      setJourneyStatus("error");
+      setJourneyError("API key required to generate agent journey.");
+      return;
+    }
+
+    let cancelled = false;
+    generateAgentJourney(data, key)
+      .then((steps) => {
+        if (cancelled) return;
+        setJourneyData(steps);
+        setJourneyStatus("success");
+      })
+      .catch((err: any) => {
+        if (cancelled) return;
+        setJourneyStatus("error");
+        setJourneyError(err?.message || "Failed to generate agent journey.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data, apiKey]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -327,6 +371,53 @@ export function DashboardPage({
 
         {/* Sidebar */}
         <div className="space-y-6">
+          <div className="p-6 rounded-lg border border-zinc-800 bg-zinc-900/30">
+            <h3 className="font-semibold text-zinc-200 mb-4">Agent Journey</h3>
+            {journeyStatus === "loading" && (
+              <p className="text-xs text-zinc-500 font-mono">
+                Simulating agent journey...
+              </p>
+            )}
+            {journeyStatus === "error" && (
+              <p className="text-xs text-red-400 font-mono">{journeyError}</p>
+            )}
+            {journeyStatus === "success" && (
+              <div className="space-y-3 text-sm">
+                {journeyData.map((step, idx) => (
+                  <div
+                    key={idx}
+                    className="border border-zinc-800 rounded-md p-3 bg-zinc-950/60"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-zinc-200 font-medium">
+                        {step.step}
+                      </span>
+                      <span
+                        className={
+                          step.status === "success"
+                            ? "text-emerald-400"
+                            : step.status === "degraded"
+                            ? "text-amber-400"
+                            : "text-red-400"
+                        }
+                      >
+                        {step.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-400">{step.reason}</p>
+                    <p className="text-xs text-zinc-500 mt-1">
+                      Impact: {step.agentImpact}
+                    </p>
+                    {step.evidence && (
+                      <p className="text-[11px] text-indigo-300 mt-1">
+                        Evidence: {step.evidence}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="p-6 rounded-lg border border-zinc-800 bg-zinc-900/30">
             <h3 className="font-semibold text-zinc-200 mb-4">
               Generated Artifacts

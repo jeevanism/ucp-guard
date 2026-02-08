@@ -1,5 +1,5 @@
 import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from "@google/genai";
-import { AuditResult } from "../types";
+import { AuditResult, AgentJourneyStep } from "../types";
 
 export async function performAudit(url: string, modelId: string, apiKey: string): Promise<AuditResult> {
   if (!apiKey || apiKey.includes("your_actual_api_key") || apiKey === "") {
@@ -231,4 +231,76 @@ export async function generatePatch(
     console.error("Patch generation failed", e);
     return "// Error generating patch. Please check API Key or try again.";
   }
+}
+
+/**
+ * Simulates an AI shopping agent journey based on audit findings.
+ */
+export async function generateAgentJourney(
+  audit: AuditResult,
+  apiKey: string,
+): Promise<AgentJourneyStep[]> {
+  if (!apiKey || apiKey.includes("your_actual_api_key") || apiKey === "") {
+    throw new Error("MISSING_API_KEY");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  const prompt = `
+You are UCP Guardian. Simulate how an autonomous AI shopping agent experiences the target store.
+
+INPUT (audit summary):
+{
+  "url": "${audit.url}",
+  "scores": ${JSON.stringify(audit.scores)},
+  "issues": ${JSON.stringify(
+    audit.issues.map((i) => ({
+      severity: i.severity,
+      title: i.title,
+      description: i.description,
+    })),
+  )},
+  "hasManifest": ${Boolean(audit.artifacts?.manifestContent)},
+  "hasMigrationGuide": ${Boolean(audit.artifacts?.migrationGuide)}
+}
+
+TASK:
+Return a JSON array with 5-7 steps showing the agent journey.
+Each item MUST follow this schema:
+{
+  "step": "string",
+  "status": "success" | "degraded" | "blocked",
+  "reason": "string",
+  "agentImpact": "string",
+  "evidence": "string (optional, short)"
+}
+
+Rules:
+- Use only information implied by the audit issues and scores.
+- Keep each field concise.
+- Return ONLY valid JSON. No markdown, no extra text.
+`;
+
+  const extractJson = (text: string | undefined) => {
+    if (!text) return null;
+    try {
+      const firstBracket = text.indexOf("[");
+      const lastBracket = text.lastIndexOf("]");
+      if (firstBracket !== -1 && lastBracket !== -1) {
+        return JSON.parse(text.substring(firstBracket, lastBracket + 1));
+      }
+    } catch (e) {
+      console.error("JSON Parse Error:", e);
+    }
+    return null;
+  };
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+  });
+
+  const data = extractJson(response.text);
+  if (Array.isArray(data)) return data as AgentJourneyStep[];
+
+  throw new Error("AGENT_JOURNEY_PARSE_FAILED");
 }
