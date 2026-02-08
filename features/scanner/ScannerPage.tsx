@@ -159,16 +159,11 @@ export function ScannerPage({
           UCP <span className="text-indigo-500">GUARDIAN</span>
         </h1>
         <p className="text-zinc-400 text-lg md:text-xl max-w-lg mx-auto leading-relaxed">
-          Audits e-commerce stores for UCP readiness and generates a compliance report with auto-fix patches.
+          Audits e-commerce stores for UCP readiness and generates a compliance
+          report with auto-fix patches.
           <span className="block mt-2 text-sm text-zinc-500 font-mono">
             Powered by Google Gemini 3 (Flash/Pro)
           </span>
-          <button
-            onClick={onOpenAbout}
-            className="block mt-3 text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 font-mono"
-          >
-            About / How It Works
-          </button>
         </p>
       </div>
 

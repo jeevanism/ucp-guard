@@ -206,17 +206,6 @@ export function App() {
       {aboutOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="w-full max-w-xl rounded-lg border border-zinc-800 bg-zinc-950 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-              <h3 className="font-mono text-sm text-indigo-400 tracking-wider">
-                ABOUT / HOW IT WORKS
-              </h3>
-              <button
-                onClick={() => setAboutOpen(false)}
-                className="text-zinc-500 hover:text-zinc-200 text-sm"
-              >
-                CLOSE
-              </button>
-            </div>
             <div className="px-6 py-5 text-sm text-zinc-300 space-y-2">
               <p>
                 UCP Guardian audits ecommerce storefronts for AI-agent readiness
