@@ -19,7 +19,6 @@ interface ScannerPageProps {
   onAuditComplete: (result: AuditResult) => void;
   apiKey: string;
   onApiKeyChange: (value: string) => void;
-  onOpenAbout: () => void;
 }
 
 const SCAN_LOGS = [
@@ -54,7 +53,6 @@ export function ScannerPage({
   onAuditComplete,
   apiKey,
   onApiKeyChange,
-  onOpenAbout,
 }: ScannerPageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [logIndex, setLogIndex] = useState(0);

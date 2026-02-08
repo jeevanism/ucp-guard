@@ -83,8 +83,6 @@ export function App() {
     "idle" | "uploading" | "success" | "error"
   >("idle");
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [aboutOpen, setAboutOpen] = useState(false);
-
   const handleAuditComplete = (result: AuditResult) => {
     setAuditData(result);
     setCurrentView("dashboard");
@@ -168,7 +166,6 @@ export function App() {
             onAuditComplete={handleAuditComplete}
             apiKey={apiKey}
             onApiKeyChange={setApiKey}
-            onOpenAbout={() => setAboutOpen(true)}
           />
         )}
         {currentView === "docs" && (
@@ -202,41 +199,6 @@ export function App() {
           <p>© 2026 UCP GUARDIAN SYSTEM. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
-
-      {aboutOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-xl rounded-lg border border-zinc-800 bg-zinc-950 shadow-2xl">
-            <div className="px-6 py-5 text-sm text-zinc-300 space-y-2">
-              <p>
-                UCP Guardian audits ecommerce storefronts for AI-agent readiness
-                and UCP compliance.
-              </p>
-              <p>Enter a URL, choose a Gemini model, and start a scan.</p>
-              <p>
-                Demo mode: use any URL containing{" "}
-                <span className="text-indigo-300 font-mono">demo</span> to run a
-                mock scan.
-              </p>
-              <p>
-                Real mode: use a valid storefront URL plus a Gemini API key.
-              </p>
-              <p>Results include scores, issues, and generated artifacts.</p>
-              <p>
-                Artifacts:{" "}
-                <span className="text-indigo-300 font-mono">ucp.json</span> and{" "}
-                <span className="text-indigo-300 font-mono">
-                  migration_guide.md
-                </span>
-                .
-              </p>
-              <p>
-                Auto-fix generates patch snippets you can copy into your
-                codebase.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
