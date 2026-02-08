@@ -28,6 +28,9 @@ Every scan generates:
 - `migration_guide.md` (step-by-step guidance).
 - Optional patch snippets (per issue) using Gemini.
 
+## Agent Journey Simulation
+The app simulates how an AI shopping agent experiences a store step-by-step. It turns audit findings into a narrative of what succeeds, what fails, and why, with a clear status per step. Demo mode uses a deterministic mock journey; real scans use Gemini to generate the journey.
+
 
 ![Audit Agent](screens/audit_agent.png)
 ## End-to-End Workflow
