@@ -84,6 +84,4 @@ index.tsx
 - `npm run preview` Preview the production build
 
 ## Reference
-A previous README and workflow notes are in `reference/`.
-
-If you want this README tailored for deployment (e.g., Firebase hosting or CI), tell me your target environment and I’ll extend it.
+https://ucp.dev/latest/
