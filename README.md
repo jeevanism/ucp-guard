@@ -55,6 +55,21 @@ The UI includes a “List Available Models” button that calls the Gemini model
 ### Auto-Fix Patches
 Click **APPLY_AUTO_FIX** on an issue to generate a code snippet. If no API key is provided, the app returns a safe mock patch.
 
+## Firebase Storage (Save Markdown Per Scan)
+This project can upload `migration_guide.md` for every completed scan to Firebase Storage at:
+`audits/<sanitized-url>/<scanId>/migration_guide.md`.
+
+### Setup
+1. Enable Firebase Storage in your Firebase project.
+2. Add your Firebase web app config in `lib/firebase.ts` (already wired in this repo).
+3. Install dependencies:
+```bash
+npm install
+```
+
+### Storage Rules
+If you want public, unauthenticated uploads for a demo, configure Storage rules accordingly. For production, require auth.
+
 ## Project Structure
 ```
 app/
