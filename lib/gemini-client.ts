@@ -6,6 +6,50 @@ export async function performAudit(url: string, modelId: string, apiKey: string)
     throw new Error("MISSING_API_KEY");
   }
 
+  const normalizeBaseUrl = (input: string) => {
+    const safe = input.startsWith("http") ? input : `https://${input}`;
+    return new URL(safe).origin;
+  };
+
+  const checkManifest = async (baseUrl: string) => {
+    const tryFetch = async (path: string) => {
+      const manifestUrl = `${baseUrl}${path}`;
+      const res = await fetch(manifestUrl, { method: "GET" });
+      if (!res.ok) return { ok: false, status: res.status };
+      try {
+        const data = await res.json();
+        return { ok: true, status: res.status, data, path };
+      } catch {
+        try {
+          const text = await res.text();
+          JSON.parse(text);
+          return { ok: true, status: res.status, data: {}, path };
+        } catch {
+          return { ok: false, status: res.status };
+        }
+      }
+    };
+
+    try {
+      const primary = await tryFetch("/.well-known/ucp");
+      if (primary.ok) return { status: "present", path: "/.well-known/ucp" };
+      if (primary.status === 404) {
+        const fallback = await tryFetch("/.well-known/ucp.json");
+        if (fallback.ok) {
+          return { status: "present", path: "/.well-known/ucp.json" };
+        }
+        if (fallback.status === 404) return { status: "missing" };
+        return { status: "unknown", httpStatus: fallback.status };
+      }
+      return { status: "unknown", httpStatus: primary.status };
+    } catch {
+      return { status: "unknown", error: "fetch_failed" };
+    }
+  };
+
+  const baseUrl = normalizeBaseUrl(url);
+  const manifestCheck = await checkManifest(baseUrl);
+
   const ai = new GoogleGenAI({ apiKey: apiKey });
   const requestMeta = {
     url,
@@ -25,6 +69,7 @@ export async function performAudit(url: string, modelId: string, apiKey: string)
   const prompt = `
     You are UCP Guardian, a helpful and harmless AI Auditor for Universal Commerce Protocol compliance.
     Target URL: ${url}
+    Manifest Check (best-effort): ${JSON.stringify(manifestCheck)}
 
     MISSION:
     1. Analyze this domain structure and purpose using public data.
@@ -33,6 +78,16 @@ export async function performAudit(url: string, modelId: string, apiKey: string)
     ARTIFACT GENERATION:
     - 'manifestContent': Generate a valid 'ucp.json' structure.
     - 'migrationGuide': A detailed Markdown guide on how to fix issues.
+
+    GUIDANCE:
+    - Prefer the official manifest path /.well-known/ucp.
+    - If missing, consider /.well-known/ucp.json as a fallback.
+    - If Manifest Check status is "unknown", do NOT claim the manifest is missing; mark as unverified instead.
+    - If a manifest is present, distinguish between:
+      1) "Structure Verified (Minimal Profile)" and
+      2) "Runtime Compliance Not Verified (Endpoints not tested)".
+    - Do NOT treat missing optional capabilities (discounts/fulfillment/etc.) as vulnerabilities. Label them as "not supported" or "not declared".
+    - Avoid contradictions like "manifest discovered" and "manifest missing" in the same report.
 
     OUTPUT FORMAT:
     Return ONLY valid JSON matching this structure:
