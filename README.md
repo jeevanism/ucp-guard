@@ -1,6 +1,7 @@
 # UCP Guardian
 
 UCP Guardian is a Vite + React app that audits ecommerce storefronts for Universal Commerce Protocol (UCP) readiness. It runs a Gemini-powered scan, scores key compliance areas, highlights issues, and generates artifacts like `ucp.json` and a migration guide. It also offers one-click, AI-generated patch snippets per issue.
+Live Demo : https://ucp-guard.web.app/
 
 ![Home Page](screens/ucp_home.png)
 
